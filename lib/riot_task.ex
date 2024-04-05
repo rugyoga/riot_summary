@@ -10,6 +10,6 @@ defmodule Mix.Tasks.Summoners do
   def run(args) do
     [player, region] = args
     {:ok, _} = Application.ensure_all_started(:riot_summary)
-    RiotSummary.call(:participants, player, region)
+    GenServer.call(RiotSummary, {:participants, player, region})
   end
 end

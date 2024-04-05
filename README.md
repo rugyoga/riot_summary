@@ -5,5 +5,5 @@ Basic implementation of Blitz take home
 Usage:
 
 ```bash
-mix summoners <player> <region>
+RIOT_API_KEY=<...> mix summoners <player> <region>
 ```

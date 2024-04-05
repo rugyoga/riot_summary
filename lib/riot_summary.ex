@@ -4,8 +4,12 @@ defmodule RiotSummary do
   """
   use GenServer
 
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, [])
+  end
+
   @impl true
-  def init(:ok) do
+  def init(_) do
     :timer.send_interval(60_000, :minute)
     {:ok, %{minute: 0}}
   end
