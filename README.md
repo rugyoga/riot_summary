@@ -14,10 +14,10 @@ The Riot API requires an API key.
 We don't want that stored in the repo so we access it from the shell environment
 via System.get_env("RIOT_API_KEY") in the config/runtime.exs
 Not config/config.exs because that grabs the value at COMPILE time.
-Ther most elegant way to supply this in HTTP requests is as a header: `X-Riot-Token`.
+Ther most elegant way to supply this in the HTTP request as a header: `X-Riot-Token`.
 
 We want to publish an update to this conssole every 60 seconds for an hour.
-EWe accomplish this by 
+We accomplish this by:
 
 ```elixir
 :timer.send_interval(60_000, :minute)
