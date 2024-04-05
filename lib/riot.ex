@@ -29,36 +29,36 @@ defmodule Riot do
     Req.new(base_url: "https://#{region}.api.riotgames.com")
   end
 
-  def rate_limit(f) do
-    case Hammer.check_rate("riot_games", 1_000, 20) do
+  @second 1_000
+  @minute 60 * @second
+
+  def throttle(f, interval, frequency) do
+    case Hammer.check_rate("riot_games", interval, frequency) do
       {:allow, _count} ->
-        case Hammer.check_rate("riot_games", 120_000, 100) do
-          {:allow, _count} ->
-            f.()
-          {:deny, _limit} ->
-            :timer.sleep(1200)
-            rate_limit(f)
-        end
+        f.()
       {:deny, _limit} ->
-        :timer.sleep(50)
-        rate_limit(f)
+        :timer.sleep(div(interval, frequency))
+        throttle(f, interval, frequency)
     end
   end
 
-  def get(url, path_params, params, context, opts \\ %{}) do
+  def minute_throttle(f), do: throttle(f, 2 * @minute, 100)
+  def second_throttle(f), do: throttle(f, @second, 20)
+
+  def raw_get(url, path_params, params, context, opts) do
     shard = Map.get(opts, :shard, :continent)
-    rate_limit(
-      fn ->
-        Req.get!(
-          req(context[shard]),
-          url: url,
-          path_params: path_params,
-          params: params,
-          headers: [{"X-Riot-Token", Application.fetch_env!(:riot_summary, :riot_api_key)}],
-          decode_json: [keys: :atoms]
-        )
-      end
+    Req.get!(
+      req(context[shard]),
+      url: url,
+      path_params: path_params,
+      params: params,
+      headers: [{"X-Riot-Token", Application.fetch_env!(:riot_summary, :riot_api_key)}],
+      decode_json: [keys: :atoms]
     )
+  end
+
+  def get(url, path_params, params, context, opts \\ %{}) do
+    minute_throttle(fn -> minute_throttle(fn -> raw_get(url, path_params, params, context, opts) end) end)
   end
 
   def player_by_name(name, context) do
@@ -75,5 +75,13 @@ defmodule Riot do
 
   def match(match, context) do
     get(@get_match, [match_id: match], [], context)
+  end
+
+  def name(info) do
+    if info.name in [nil, ""] do
+      "<#{info.puuid}>"
+    else
+      info.name
+    end
   end
 end

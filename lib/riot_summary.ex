@@ -21,7 +21,7 @@ defmodule RiotSummary do
     matches = recent(player, context)
     participants = all_participants(matches, context)
     {:reply,
-     participants |> Map.values |> Enum.map(& &1.name),
+     participants |> Map.values |> Enum.map(&Riot.name/1),
      %{state | matches: matches, participants: participants, context: context}}
   rescue
     error -> {:stop, error, state}
@@ -30,31 +30,28 @@ defmodule RiotSummary do
   @impl true
   def handle_info(:minute, state) do
     new_minute = state.minute+1
-    if new_minute == 60 do
-      {:stop, "Mission completed", state}
-    else
-      IO.puts "Minute #{new_minute}"
-      new_matches = MapSet.union(state.matches, new_matches(state))
-      {:noreply, %{state | minute: new_minute, matches: new_matches}}
+    IO.puts "Minute #{new_minute}"
+    new_matches = MapSet.union(state.matches, new_matches(state))
+    if new_minute == 60, do: System.halt(0)
+    {:noreply, %{state | minute: new_minute, matches: new_matches}}
+  end
+
+  def last_match({puuid, info}, state) do
+    case Riot.matches_by_puuid(puuid, state.context, [count: 1]) do
+      %Req.Response{status: 200, body: [match]} ->
+        if not MapSet.member?(state.matches, match) do
+          IO.puts "Summoner #{Riot.name(info)} completed match #{match}"
+          [match]
+        else
+          []
+        end
+      _ -> []
     end
   end
 
-  def new_matches(%{context: context, matches: matches, participants: participants}) do
-    participants
-    |> Enum.flat_map(
-      fn {puuid, info} ->
-        case Riot.matches_by_puuid(puuid, context, [count: 1]) do
-          %Req.Response{status: 200, body: [match]} ->
-            if MapSet.member?(matches, match) do
-              []
-            else
-              IO.puts "Summoner #{info.name} completed match #{match}"
-              [match]
-            end
-          _ -> []
-        end
-      end
-    )
+  def new_matches(state) do
+    state.participants
+    |> Enum.flat_map(&last_match(&1, state))
     |> MapSet.new
   end
 

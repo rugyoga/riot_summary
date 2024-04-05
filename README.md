@@ -34,3 +34,5 @@ Found `imaqtpie` on the `na1` server.
 
 Riot seems to have two different notions of server:
 one is regional and the other is continental.
+
+Some folk seem to have blank names so substituting <puuid> instead.
