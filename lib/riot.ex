@@ -54,7 +54,7 @@ defmodule Riot do
           url: url,
           path_params: path_params,
           params: params,
-          headers: [{"X-Riot-Token", context.api_key}],
+          headers: [{"X-Riot-Token", Application.fetch_env!(:riot_summary, :riot_api_key)}],
           decode_json: [keys: :atoms]
         )
       end
