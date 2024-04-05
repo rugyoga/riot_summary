@@ -4,8 +4,9 @@ defmodule RiotSummary do
   """
   use GenServer
 
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, [])
+  def start_link(opts) do
+    name = Keyword.get(opts, :name, __MODULE__)
+    GenServer.start_link(__MODULE__, [], name: name)
   end
 
   @impl true
