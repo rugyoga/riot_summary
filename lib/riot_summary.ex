@@ -64,6 +64,7 @@ defmodule RiotSummary do
     |> Riot.player_by_name(context)
     |> then(& &1.body.puuid)
     |> Riot.matches_by_puuid(context, [count: 5])
+    |> then(& &1.body)
   end
 
   def all_participants(matches, context) do
