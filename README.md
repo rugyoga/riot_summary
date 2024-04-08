@@ -12,7 +12,7 @@ RIOT_API_KEY=<...> mix summoners <player> <region>
 
 The Riot API requires an API key.
 We don't want that stored in the repo so we access it from the shell environment
-via System.get_env("RIOT_API_KEY") in the config/runtime.exs.
+via `System.get_env("RIOT_API_KEY")` in the config/runtime.exs.
 Not config/config.exs because that grabs the value at **COMPILE** time.
 The most elegant way to supply this to the HTTP request is as the header: `X-Riot-Token`.
 
