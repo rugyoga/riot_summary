@@ -1,4 +1,6 @@
 defmodule Riot do
+  @moduledoc "Wrapper around the Riot REST API"
+
   @regions %{
     "br1" => "americas",
     "na1" => "americas",
@@ -75,6 +77,13 @@ defmodule Riot do
 
   def match(match, context) do
     get(@get_match, [match_id: match], [], context)
+  end
+
+  def last_match(puuid, context) do
+    case matches_by_puuid(puuid, context, [count: 1]) do
+      %Req.Response{status: 200, body: [match]} -> [{puuid, match}]
+      _ -> []
+    end
   end
 
   def name(info) do

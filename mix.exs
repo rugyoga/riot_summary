@@ -22,8 +22,10 @@ defmodule RiotSummary.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:req, "~> 0.3.0"},
-      {:hammer, "~> 6.1"}
+      {:credo, "~> 1.7.5", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.4.3", only: [:dev], runtime: false},
+      {:hammer, "~> 6.1"},
+      {:req, "~> 0.3.0"}
     ]
   end
 end

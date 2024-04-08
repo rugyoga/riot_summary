@@ -22,37 +22,37 @@ defmodule RiotSummary do
     participants = all_participants(matches, context)
     {:reply,
      participants |> Map.values |> Enum.map(&Riot.name/1),
-     %{state | matches: matches, participants: participants, context: context}}
+     %{state | matches: matches, participants: participants, context: context},
+     {:continue, {:process_expired_matches}}}
   rescue
     error -> {:stop, error, state}
   end
 
   @impl true
+  def handle_continue({:process_expired_matches}, state) do
+    expired_matches = state |> latest_matches() |> Enum.unzip() |> elem(1) |> MapSet.new
+    {:noreply, %{state | matches: MapSet.union(state.matches, expired_matches)}}
+  end
+
+  @impl true
   def handle_info(:minute, state) do
-    new_minute = state.minute+1
+    new_minute = state.minute + 1
     IO.puts "Minute #{new_minute}"
-    new_matches = MapSet.union(state.matches, new_matches(state))
+    new_matches = state |> latest_matches() |> Enum.reject(fn {_, match} -> MapSet.member?(state.matches, match) end)
+    Enum.each(
+      new_matches,
+      fn {puuid, match} -> IO.puts "Summoner #{Riot.name(state.participants[puuid])} completed match #{match}" end
+    )
+
+    matches = MapSet.union(state.matches, new_matches |> Enum.unzip() |> elem(1) |> MapSet.new)
     if new_minute == 60, do: System.halt(0)
-    {:noreply, %{state | minute: new_minute, matches: new_matches}}
+    {:noreply, %{state | minute: new_minute, matches: matches}}
   end
 
-  def last_match({puuid, info}, state) do
-    case Riot.matches_by_puuid(puuid, state.context, [count: 1]) do
-      %Req.Response{status: 200, body: [match]} ->
-        if not MapSet.member?(state.matches, match) do
-          IO.puts "Summoner #{Riot.name(info)} completed match #{match}"
-          [match]
-        else
-          []
-        end
-      _ -> []
-    end
-  end
-
-  def new_matches(state) do
+  def latest_matches(state) do
     state.participants
-    |> Enum.flat_map(&last_match(&1, state))
-    |> MapSet.new
+    |> Map.keys
+    |> Enum.flat_map(&Riot.last_match(&1, state.context))
   end
 
   def recent(name, context) do
