@@ -11,7 +11,8 @@ defmodule RiotSummary do
 
   @impl true
   def init(_) do
-    :timer.send_interval(60_000, :minute)
+    :timer.send_interval(60 * 1_000, :minute)
+    :timer.send_interval(((61 * 60) - 1) * 1_000, :hour)
     {:ok, %{minute: 0, participants: %{}, matches: MapSet.new, context: %{region: "na1", continent: "americas"}}}
   end
 
@@ -45,8 +46,13 @@ defmodule RiotSummary do
     )
 
     matches = MapSet.union(state.matches, new_matches |> Enum.unzip() |> elem(1) |> MapSet.new)
-    if new_minute == 60, do: System.halt(0)
     {:noreply, %{state | minute: new_minute, matches: matches}}
+  end
+
+  @impl true
+  def handle_info(:hour, state) do
+    System.halt(0)
+    {:stop, "Finished", state}
   end
 
   def latest_matches(state) do

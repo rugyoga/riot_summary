@@ -25,7 +25,7 @@ defmodule Riot do
   @matches_by_puuid "/lol/match/v5/matches/by-puuid/:puuid/ids"
   @get_match "/lol/match/v5/matches/:match_id"
 
-  defp continent(region), do: @regions[region] || "americas"
+  def continent(region), do: @regions[region] || "americas"
 
   defp req(region) do
     Req.new(base_url: "https://#{region}.api.riotgames.com")

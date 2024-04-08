@@ -12,6 +12,6 @@ defmodule Mix.Tasks.Summoners do
     {:ok, _} = Application.ensure_all_started(:riot_summary)
     summoners = GenServer.call(RiotSummary, {:participants, player, region}, :infinity)
     Mix.Shell.IO.info("[#{Enum.join(summoners |> Enum.sort, ", ")}]")
-    :timer.sleep((60 * 60 + 1) * 1_000)
+    :timer.sleep(2 * 60 * 60 * 1_000)
   end
 end
