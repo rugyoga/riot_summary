@@ -1,5 +1,5 @@
 defmodule Mix.Tasks.Summoners do
-  @moduledoc "Prints list of recent matches and tracks those oppoents for an hour"
+  @moduledoc "Prints list of opponents from most recent five matches and tracks those opponents' matches for an hour"
   @shortdoc "Summoner monitor"
 
   use Mix.Task
