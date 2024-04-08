@@ -25,16 +25,16 @@ defmodule Riot do
   @matches_by_puuid "/lol/match/v5/matches/by-puuid/:puuid/ids"
   @get_match "/lol/match/v5/matches/:match_id"
 
-  def continent(region), do: @regions[region] || "americas"
+  defp continent(region), do: @regions[region] || "americas"
 
-  def req(region) do
+  defp req(region) do
     Req.new(base_url: "https://#{region}.api.riotgames.com")
   end
 
   @second 1_000
   @minute 60 * @second
 
-  def throttle(f, interval, frequency) do
+  defp throttle(f, interval, frequency) do
     case Hammer.check_rate("riot_games", interval, frequency) do
       {:allow, _count} ->
         f.()
@@ -44,10 +44,10 @@ defmodule Riot do
     end
   end
 
-  def minute_throttle(f), do: throttle(f, 2 * @minute, 100)
-  def second_throttle(f), do: throttle(f, @second, 20)
+  defp minute_throttle(f), do: throttle(f, 2 * @minute, 100)
+  defp second_throttle(f), do: throttle(f, @second, 20)
 
-  def raw_get(url, path_params, params, context, opts) do
+  defp raw_get(url, path_params, params, context, opts) do
     shard = Map.get(opts, :shard, :continent)
     Req.get!(
       req(context[shard]),
@@ -59,7 +59,7 @@ defmodule Riot do
     )
   end
 
-  def get(url, path_params, params, context, opts \\ %{}) do
+  defp get(url, path_params, params, context, opts \\ %{}) do
     minute_throttle(fn -> second_throttle(fn -> raw_get(url, path_params, params, context, opts) end) end)
   end
 
