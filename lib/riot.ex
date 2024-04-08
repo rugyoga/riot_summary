@@ -60,7 +60,7 @@ defmodule Riot do
   end
 
   def get(url, path_params, params, context, opts \\ %{}) do
-    minute_throttle(fn -> minute_throttle(fn -> raw_get(url, path_params, params, context, opts) end) end)
+    minute_throttle(fn -> second_throttle(fn -> raw_get(url, path_params, params, context, opts) end) end)
   end
 
   def player_by_name(name, context) do
