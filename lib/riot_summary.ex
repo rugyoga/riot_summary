@@ -38,7 +38,7 @@ defmodule RiotSummary do
   @impl true
   def handle_info(:minute, state) do
     new_minute = state.minute + 1
-    IO.puts "Minute #{new_minute}"
+    IO.puts "Minute #{new_minute} (#{DateTime.utc_now()})"
     new_matches = state |> latest_matches() |> Enum.reject(fn {_, match} -> MapSet.member?(state.matches, match) end)
     Enum.each(
       new_matches,
